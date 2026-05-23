@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import API from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import { useSocket } from '../context/SocketContext';
-import { 
-  ShoppingBag, 
-  MessageSquare, 
-  ClipboardList, 
-  User as UserIcon, 
-  LogOut, 
-  Sun, 
-  Moon, 
-  ShieldCheck, 
-  Menu, 
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import API from "../services/api";
+import { useAuth } from "../context/AuthContext";
+import { useSocket } from "../context/SocketContext";
+import {
+  ShoppingBag,
+  MessageSquare,
+  ClipboardList,
+  User as UserIcon,
+  LogOut,
+  Sun,
+  Moon,
+  ShieldCheck,
+  Menu,
   X,
-  PlusCircle
-} from 'lucide-react';
+  PlusCircle,
+} from "lucide-react";
 
 export const Navbar: React.FC = () => {
   const { user, logout, theme, toggleTheme } = useAuth();
@@ -29,18 +29,20 @@ export const Navbar: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   useEffect(() => {
     const fetchChatConversations = async () => {
       try {
-        const res = await API.get('/chat/conversations');
+        const res = await API.get("/chat/conversations");
         if (res.data.success && Array.isArray(res.data.data)) {
-          setChatCount(location.pathname === '/chat' ? 0 : res.data.data.length);
+          setChatCount(
+            location.pathname === "/chat" ? 0 : res.data.data.length,
+          );
         }
       } catch (err) {
-        console.error('Unable to fetch chat count:', err);
+        console.error("Unable to fetch chat count:", err);
       }
     };
 
@@ -53,24 +55,24 @@ export const Navbar: React.FC = () => {
     if (!socket) return;
 
     const handleReceiveMessage = () => {
-      if (location.pathname === '/chat') {
+      if (location.pathname === "/chat") {
         setChatCount(0);
       } else {
         setChatCount((count) => count + 1);
       }
     };
 
-    socket.on('receive_message', handleReceiveMessage);
+    socket.on("receive_message", handleReceiveMessage);
     return () => {
-      socket.off('receive_message', handleReceiveMessage);
+      socket.off("receive_message", handleReceiveMessage);
     };
   }, [socket, location.pathname]);
 
   const navLinks = [
-    { name: 'Dashboard', path: '/', icon: ShoppingBag },
-    { name: 'My Orders', path: '/orders', icon: ClipboardList },
-    { name: 'Chat', path: '/chat', icon: MessageSquare },
-    { name: 'Profile', path: '/profile', icon: UserIcon },
+    { name: "Dashboard", path: "/", icon: ShoppingBag },
+    { name: "My Orders", path: "/orders", icon: ClipboardList },
+    { name: "Chat", path: "/chat", icon: MessageSquare },
+    { name: "Profile", path: "/profile", icon: UserIcon },
   ];
 
   return (
@@ -100,15 +102,15 @@ export const Navbar: React.FC = () => {
                     to={link.path}
                     className={`relative flex items-center space-x-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                       isActive(link.path)
-                        ? 'bg-primary-50 dark:bg-primary-950/50 text-primary-600 dark:text-primary-400'
-                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                        ? "bg-primary-50 dark:bg-primary-950/50 text-primary-600 dark:text-primary-400"
+                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
                     }`}
                   >
                     <Icon className="w-4 h-4" />
                     <span>{link.name}</span>
-                    {link.path === '/chat' && chatCount > 0 && (
+                    {link.path === "/chat" && chatCount > 0 && (
                       <span className="absolute -top-1 -right-2 inline-flex min-w-[1.3rem] h-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-bold text-white">
-                        {chatCount > 99 ? '99+' : chatCount}
+                        {chatCount > 99 ? "99+" : chatCount}
                       </span>
                     )}
                   </Link>
@@ -119,9 +121,9 @@ export const Navbar: React.FC = () => {
                 <Link
                   to="/admin"
                   className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    isActive('/admin')
-                      ? 'bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400'
-                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                    isActive("/admin")
+                      ? "bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
                   }`}
                 >
                   <ShieldCheck className="w-4 h-4" />
@@ -150,7 +152,11 @@ export const Navbar: React.FC = () => {
               className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 rounded-xl transition-all duration-200"
               aria-label="Toggle Theme"
             >
-              {theme === 'dark' ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-slate-700" />}
+              {theme === "dark" ? (
+                <Sun className="w-5 h-5 text-amber-400" />
+              ) : (
+                <Moon className="w-5 h-5 text-slate-700" />
+              )}
             </button>
 
             {/* Logout */}
@@ -171,7 +177,11 @@ export const Navbar: React.FC = () => {
               onClick={toggleTheme}
               className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all duration-200"
             >
-              {theme === 'dark' ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-slate-700" />}
+              {theme === "dark" ? (
+                <Sun className="w-5 h-5 text-amber-400" />
+              ) : (
+                <Moon className="w-5 h-5 text-slate-700" />
+              )}
             </button>
 
             {user && (
@@ -179,7 +189,11 @@ export const Navbar: React.FC = () => {
                 onClick={() => setIsOpen(!isOpen)}
                 className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl focus:outline-none"
               >
-                {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                {isOpen ? (
+                  <X className="w-6 h-6" />
+                ) : (
+                  <Menu className="w-6 h-6" />
+                )}
               </button>
             )}
           </div>
@@ -199,15 +213,15 @@ export const Navbar: React.FC = () => {
                   onClick={() => setIsOpen(false)}
                   className={`relative flex items-center space-x-2 px-3 py-2.5 rounded-xl text-base font-medium ${
                     isActive(link.path)
-                      ? 'bg-primary-50 dark:bg-primary-950/50 text-primary-600 dark:text-primary-400'
-                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                      ? "bg-primary-50 dark:bg-primary-950/50 text-primary-600 dark:text-primary-400"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
                   }`}
                 >
                   <Icon className="w-5 h-5" />
                   <span>{link.name}</span>
-                  {link.path === '/chat' && chatCount > 0 && (
+                  {link.path === "/chat" && chatCount > 0 && (
                     <span className="absolute -top-1 -right-2 inline-flex min-w-[1.3rem] h-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-bold text-white">
-                      {chatCount > 99 ? '99+' : chatCount}
+                      {chatCount > 99 ? "99+" : chatCount}
                     </span>
                   )}
                 </Link>
@@ -219,9 +233,9 @@ export const Navbar: React.FC = () => {
                 to="/admin"
                 onClick={() => setIsOpen(false)}
                 className={`flex items-center space-x-2 px-3 py-2.5 rounded-xl text-base font-medium ${
-                  isActive('/admin')
-                    ? 'bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400'
-                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                  isActive("/admin")
+                    ? "bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400"
+                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
                 }`}
               >
                 <ShieldCheck className="w-5 h-5" />

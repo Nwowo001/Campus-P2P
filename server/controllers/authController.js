@@ -1,14 +1,18 @@
-const User = require('../models/User');
-const Order = require('../models/Order');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { validationResult } = require('express-validator');
+const User = require("../models/User");
+const Order = require("../models/Order");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { validationResult } = require("express-validator");
 
 // Generate JWT Token
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'campusmart_jwt_super_secure_secret_key_2026', {
-    expiresIn: '30d',
-  });
+  return jwt.sign(
+    { id },
+    process.env.JWT_SECRET || "campusmart_jwt_super_secure_secret_key_2026",
+    {
+      expiresIn: "30d",
+    },
+  );
 };
 
 // @desc    Register a new user
@@ -26,7 +30,12 @@ const registerUser = async (req, res) => {
     // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ success: false, message: 'User already exists with this email' });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "User already exists with this email",
+        });
     }
 
     // Hash password
@@ -58,11 +67,13 @@ const registerUser = async (req, res) => {
         },
       });
     } else {
-      return res.status(400).json({ success: false, message: 'Invalid user data' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid user data" });
     }
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: 'Server error' });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -80,16 +91,25 @@ const loginUser = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid email or password" });
     }
 
     if (user.isBlocked) {
-      return res.status(403).json({ success: false, message: 'This account has been blocked. Contact support.' });
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "This account has been blocked. Contact support.",
+        });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid email or password" });
     }
 
     return res.json({
@@ -104,15 +124,15 @@ const loginUser = async (req, res) => {
         isVerified: user.isVerified,
         ratingAverage: user.ratingAverage,
         ratingCount: user.ratingCount,
-        bankName: user.bankName || '',
-        bankAccountNumber: user.bankAccountNumber || '',
+        bankName: user.bankName || "",
+        bankAccountNumber: user.bankAccountNumber || "",
         isBlocked: user.isBlocked || false,
         token: generateToken(user._id),
       },
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: 'Server error' });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -121,19 +141,30 @@ const loginUser = async (req, res) => {
 // @access  Private
 const getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const user = await User.findById(req.user.id).select("-password");
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
-    const completedSales = await Order.find({ sellerId: user._id, status: 'completed' });
-    const completedPurchases = await Order.find({ buyerId: user._id, status: 'completed' });
+    const completedSales = await Order.find({
+      sellerId: user._id,
+      status: "completed",
+    });
+    const completedPurchases = await Order.find({
+      buyerId: user._id,
+      status: "completed",
+    });
 
     const totalEarned = completedSales.reduce(
       (sum, order) => sum + (order.sellerAmount ?? order.amount * 0.9),
       0,
     );
-    const totalSpent = completedPurchases.reduce((sum, order) => sum + order.amount, 0);
+    const totalSpent = completedPurchases.reduce(
+      (sum, order) => sum + order.amount,
+      0,
+    );
 
     return res.json({
       success: true,
@@ -147,7 +178,7 @@ const getUserProfile = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: 'Server error' });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -158,7 +189,9 @@ const updateUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     const { name, department, level, bankName, bankAccountNumber } = req.body;
@@ -167,7 +200,8 @@ const updateUserProfile = async (req, res) => {
     if (department) user.department = department;
     if (level) user.level = level;
     if (bankName !== undefined) user.bankName = bankName;
-    if (bankAccountNumber !== undefined) user.bankAccountNumber = bankAccountNumber;
+    if (bankAccountNumber !== undefined)
+      user.bankAccountNumber = bankAccountNumber;
 
     await user.save();
 
@@ -177,7 +211,7 @@ const updateUserProfile = async (req, res) => {
     return res.json({ success: true, data: safeUser });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ success: false, message: 'Server error' });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 

@@ -1,32 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import API from '../services/api';
-import { 
-  ShieldAlert, 
-  Users, 
-  ShoppingBag, 
-  BarChart3, 
-  Trash2, 
-  CheckCircle, 
+import React, { useState, useEffect } from "react";
+import API from "../services/api";
+import {
+  ShieldAlert,
+  Users,
+  ShoppingBag,
+  BarChart3,
+  Trash2,
+  CheckCircle,
   FileText,
-  DollarSign
-} from 'lucide-react';
+  DollarSign,
+} from "lucide-react";
 
 export const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
-    setError('');
+    setError("");
     try {
       const [statsRes, reportsRes, usersRes] = await Promise.all([
-        API.get('/reports/stats'),
-        API.get('/reports'),
-        API.get('/users'),
+        API.get("/reports/stats"),
+        API.get("/reports"),
+        API.get("/users"),
       ]);
 
       if (statsRes.data.success) {
@@ -40,7 +40,7 @@ export const AdminDashboard: React.FC = () => {
       }
     } catch (err) {
       console.error(err);
-      setError('Failed to fetch administration data');
+      setError("Failed to fetch administration data");
     } finally {
       setLoading(false);
     }
@@ -58,12 +58,12 @@ export const AdminDashboard: React.FC = () => {
         setReports((prev) => prev.filter((r) => r._id !== reportId));
         setStats((prev: any) => ({
           ...prev,
-          totalReports: Math.max(0, prev.totalReports - 1)
+          totalReports: Math.max(0, prev.totalReports - 1),
         }));
       }
     } catch (err) {
       console.error(err);
-      alert('Failed to dismiss report');
+      alert("Failed to dismiss report");
     } finally {
       setActionLoadingId(null);
     }
@@ -75,7 +75,9 @@ export const AdminDashboard: React.FC = () => {
       // Block the reported user and remove the report from the list
       const blockRes = await API.put(`/users/${userId}/block`);
       if (blockRes.data.success) {
-        setUsers((prev) => prev.map((user) => (user._id === userId ? blockRes.data.data : user)));
+        setUsers((prev) =>
+          prev.map((user) => (user._id === userId ? blockRes.data.data : user)),
+        );
       }
 
       await API.delete(`/reports/${reportId}`);
@@ -86,16 +88,16 @@ export const AdminDashboard: React.FC = () => {
       }));
     } catch (err) {
       console.error(err);
-      alert('Failed to execute ban');
+      alert("Failed to execute ban");
     } finally {
       setActionLoadingId(null);
     }
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price);
@@ -106,7 +108,9 @@ export const AdminDashboard: React.FC = () => {
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="flex flex-col items-center space-y-3">
           <div className="w-10 h-10 border-4 border-t-primary-500 border-slate-200 dark:border-slate-800 rounded-full animate-spin"></div>
-          <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">Loading admin metrics...</p>
+          <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+            Loading admin metrics...
+          </p>
         </div>
       </div>
     );
@@ -114,7 +118,6 @@ export const AdminDashboard: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 fade-in">
-      
       {/* Title */}
       <div className="flex items-center space-x-2.5">
         <div className="p-2.5 bg-red-150 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-2xl">
@@ -145,8 +148,12 @@ export const AdminDashboard: React.FC = () => {
               <DollarSign className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Transaction Volume</p>
-              <h3 className="text-xl font-extrabold text-slate-850 dark:text-white">{formatPrice(stats.totalVolume)}</h3>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                Transaction Volume
+              </p>
+              <h3 className="text-xl font-extrabold text-slate-850 dark:text-white">
+                {formatPrice(stats.totalVolume)}
+              </h3>
             </div>
           </div>
 
@@ -156,8 +163,12 @@ export const AdminDashboard: React.FC = () => {
               <Users className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Users</p>
-              <h3 className="text-xl font-extrabold text-slate-850 dark:text-white">{stats.totalUsers}</h3>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                Total Users
+              </p>
+              <h3 className="text-xl font-extrabold text-slate-850 dark:text-white">
+                {stats.totalUsers}
+              </h3>
             </div>
           </div>
 
@@ -167,8 +178,12 @@ export const AdminDashboard: React.FC = () => {
               <ShoppingBag className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Transactions</p>
-              <h3 className="text-xl font-extrabold text-slate-850 dark:text-white">{stats.totalOrders}</h3>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                Total Transactions
+              </p>
+              <h3 className="text-xl font-extrabold text-slate-850 dark:text-white">
+                {stats.totalOrders}
+              </h3>
             </div>
           </div>
 
@@ -178,8 +193,12 @@ export const AdminDashboard: React.FC = () => {
               <DollarSign className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Platform Commission</p>
-              <h3 className="text-xl font-extrabold text-slate-850 dark:text-white">{formatPrice(stats.totalCommission || 0)}</h3>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                Platform Commission
+              </p>
+              <h3 className="text-xl font-extrabold text-slate-850 dark:text-white">
+                {formatPrice(stats.totalCommission || 0)}
+              </h3>
             </div>
           </div>
 
@@ -189,8 +208,12 @@ export const AdminDashboard: React.FC = () => {
               <BarChart3 className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Listings</p>
-              <h3 className="text-xl font-extrabold text-slate-850 dark:text-white">{stats.activeProductsCount}</h3>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                Active Listings
+              </p>
+              <h3 className="text-xl font-extrabold text-slate-850 dark:text-white">
+                {stats.activeProductsCount}
+              </h3>
             </div>
           </div>
         </div>
@@ -207,8 +230,12 @@ export const AdminDashboard: React.FC = () => {
 
         {users.length === 0 ? (
           <div className="p-12 text-center text-slate-450 dark:text-slate-500">
-            <p className="font-bold text-slate-700 dark:text-white">No users found</p>
-            <p className="text-sm max-w-xs mx-auto mt-1">There are currently no registered student accounts.</p>
+            <p className="font-bold text-slate-700 dark:text-white">
+              No users found
+            </p>
+            <p className="text-sm max-w-xs mx-auto mt-1">
+              There are currently no registered student accounts.
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -224,24 +251,43 @@ export const AdminDashboard: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
                 {users.map((user) => (
-                  <tr key={user._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-850/20">
-                    <td className="p-4 font-semibold text-slate-800 dark:text-slate-200">{user.name}</td>
-                    <td className="p-4 text-slate-600 dark:text-slate-300">{user.email}</td>
-                    <td className="p-4 text-slate-600 dark:text-slate-300">{user.isAdmin ? 'Admin' : 'Student'}</td>
-                    <td className="p-4 text-slate-600 dark:text-slate-300">{user.isBlocked ? 'Blocked' : 'Active'}</td>
+                  <tr
+                    key={user._id}
+                    className="hover:bg-slate-50/50 dark:hover:bg-slate-850/20"
+                  >
+                    <td className="p-4 font-semibold text-slate-800 dark:text-slate-200">
+                      {user.name}
+                    </td>
+                    <td className="p-4 text-slate-600 dark:text-slate-300">
+                      {user.email}
+                    </td>
+                    <td className="p-4 text-slate-600 dark:text-slate-300">
+                      {user.isAdmin ? "Admin" : "Student"}
+                    </td>
+                    <td className="p-4 text-slate-600 dark:text-slate-300">
+                      {user.isBlocked ? "Blocked" : "Active"}
+                    </td>
                     <td className="p-4 text-right">
                       <div className="flex flex-wrap justify-end gap-2">
                         <button
                           onClick={async () => {
                             setActionLoadingId(user._id);
                             try {
-                              const res = await API.put(`/users/${user._id}/block`);
+                              const res = await API.put(
+                                `/users/${user._id}/block`,
+                              );
                               if (res.data.success) {
-                                setUsers((prev) => prev.map((item) => (item._id === user._id ? res.data.data : item)));
+                                setUsers((prev) =>
+                                  prev.map((item) =>
+                                    item._id === user._id
+                                      ? res.data.data
+                                      : item,
+                                  ),
+                                );
                               }
                             } catch (err) {
                               console.error(err);
-                              alert('Failed to update user status');
+                              alert("Failed to update user status");
                             } finally {
                               setActionLoadingId(null);
                             }
@@ -249,20 +295,25 @@ export const AdminDashboard: React.FC = () => {
                           disabled={actionLoadingId === user._id}
                           className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-850 disabled:opacity-50"
                         >
-                          {user.isBlocked ? 'Unblock' : 'Block'}
+                          {user.isBlocked ? "Unblock" : "Block"}
                         </button>
                         <button
                           onClick={async () => {
-                            if (!window.confirm('Delete this user account?')) return;
+                            if (!window.confirm("Delete this user account?"))
+                              return;
                             setActionLoadingId(user._id);
                             try {
-                              const res = await API.delete(`/users/${user._id}`);
+                              const res = await API.delete(
+                                `/users/${user._id}`,
+                              );
                               if (res.data.success) {
-                                setUsers((prev) => prev.filter((item) => item._id !== user._id));
+                                setUsers((prev) =>
+                                  prev.filter((item) => item._id !== user._id),
+                                );
                               }
                             } catch (err) {
                               console.error(err);
-                              alert('Failed to delete user');
+                              alert("Failed to delete user");
                             } finally {
                               setActionLoadingId(null);
                             }
@@ -294,9 +345,12 @@ export const AdminDashboard: React.FC = () => {
         {reports.length === 0 ? (
           <div className="p-12 text-center text-slate-450 dark:text-slate-500">
             <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
-            <h4 className="font-bold text-slate-700 dark:text-white">All Clear!</h4>
+            <h4 className="font-bold text-slate-700 dark:text-white">
+              All Clear!
+            </h4>
             <p className="text-sm max-w-xs mx-auto mt-1">
-              There are no pending student reports. All transactions running safely.
+              There are no pending student reports. All transactions running
+              safely.
             </p>
           </div>
         ) : (
@@ -313,16 +367,23 @@ export const AdminDashboard: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
                 {reports.map((report) => (
-                  <tr key={report._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-850/20">
+                  <tr
+                    key={report._id}
+                    className="hover:bg-slate-50/50 dark:hover:bg-slate-850/20"
+                  >
                     {/* Reported User */}
                     <td className="p-4">
                       {report.reportedUserId ? (
                         <div className="font-semibold text-slate-800 dark:text-slate-200">
                           {report.reportedUserId.name}
-                          <div className="text-xs text-slate-450 font-normal">{report.reportedUserId.email}</div>
+                          <div className="text-xs text-slate-450 font-normal">
+                            {report.reportedUserId.email}
+                          </div>
                         </div>
                       ) : (
-                        <span className="text-slate-400 font-normal italic">Deleted User</span>
+                        <span className="text-slate-400 font-normal italic">
+                          Deleted User
+                        </span>
                       )}
                     </td>
 
@@ -331,10 +392,14 @@ export const AdminDashboard: React.FC = () => {
                       {report.reporterId ? (
                         <div className="font-semibold text-slate-700 dark:text-slate-350">
                           {report.reporterId.name}
-                          <div className="text-xs text-slate-450 font-normal">{report.reporterId.email}</div>
+                          <div className="text-xs text-slate-450 font-normal">
+                            {report.reporterId.email}
+                          </div>
                         </div>
                       ) : (
-                        <span className="text-slate-400 italic">Deleted User</span>
+                        <span className="text-slate-400 italic">
+                          Deleted User
+                        </span>
                       )}
                     </td>
 
@@ -347,12 +412,15 @@ export const AdminDashboard: React.FC = () => {
 
                     {/* Date */}
                     <td className="p-4 text-slate-500 dark:text-slate-400 whitespace-nowrap text-xs">
-                      {new Date(report.createdAt).toLocaleDateString(undefined, {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                      {new Date(report.createdAt).toLocaleDateString(
+                        undefined,
+                        {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        },
+                      )}
                     </td>
 
                     {/* Actions */}
@@ -371,7 +439,12 @@ export const AdminDashboard: React.FC = () => {
                         {/* Ban */}
                         {report.reportedUserId && (
                           <button
-                            onClick={() => handleBlockUser(report.reportedUserId._id, report._id)}
+                            onClick={() =>
+                              handleBlockUser(
+                                report.reportedUserId._id,
+                                report._id,
+                              )
+                            }
                             disabled={actionLoadingId === report._id}
                             className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-red-650/10 hover:bg-red-650/20 text-xs font-semibold text-red-600 dark:text-red-400 disabled:opacity-50"
                           >
