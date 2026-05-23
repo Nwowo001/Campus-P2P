@@ -9,11 +9,14 @@ import {
   Mail,
   Star,
   LogOut,
+  CreditCard,
+  TrendingUp,
+  DollarSign,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const ProfilePage: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
   const navigate = useNavigate();
 
   const [activeProducts, setActiveProducts] = useState<any[]>([]);
@@ -21,11 +24,18 @@ export const ProfilePage: React.FC = () => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [subTab, setSubTab] = useState<"listings" | "reviews">("listings");
+  const [bankName, setBankName] = useState("");
+  const [bankAccountNumber, setBankAccountNumber] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   const fetchProfileData = async () => {
     if (!user) return;
     setLoading(true);
     try {
+      setBankName(user.bankName || '');
+      setBankAccountNumber(user.bankAccountNumber || '');
+
       // 1. Fetch user's listings
       const productsRes = await API.get("/products");
       if (productsRes.data.success) {
@@ -52,6 +62,30 @@ export const ProfilePage: React.FC = () => {
   useEffect(() => {
     fetchProfileData();
   }, [user]);
+
+  const handleSaveProfile = async () => {
+    setSavingProfile(true);
+    setSaveMessage(null);
+
+    try {
+      const res = await API.put('/auth/me', {
+        bankName,
+        bankAccountNumber,
+      });
+
+      if (res.data.success) {
+        await refreshUser();
+        setSaveMessage('Payout profile saved successfully.');
+      } else {
+        setSaveMessage('Unable to save payout details.');
+      }
+    } catch (err) {
+      console.error(err);
+      setSaveMessage('Unable to save payout details.');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -125,6 +159,88 @@ export const ProfilePage: React.FC = () => {
           <LogOut className="w-4 h-4" />
           <span>Logout</span>
         </button>
+      </div>
+
+      {/* Earnings + Payout Summary */}
+      <div className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/40 shadow-sm">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Total Earnings</p>
+                <h2 className="mt-3 text-3xl font-extrabold text-slate-900 dark:text-white">
+                  ₦{user?.totalEarned?.toLocaleString('en-NG') || '0'}
+                </h2>
+              </div>
+              <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500">
+                <DollarSign className="w-6 h-6" />
+              </div>
+            </div>
+            <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+              Amount available from completed sales after the 10% platform commission.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/40 shadow-sm">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Sales Completed</p>
+                <h2 className="mt-3 text-3xl font-extrabold text-slate-900 dark:text-white">
+                  {user?.totalSales ?? 0}
+                </h2>
+              </div>
+              <div className="p-3 rounded-2xl bg-sky-50 dark:bg-sky-950/20 text-sky-500">
+                <TrendingUp className="w-6 h-6" />
+              </div>
+            </div>
+            <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+              Completed orders that have been delivered and confirmed by buyers.
+            </p>
+          </div>
+        </div>
+
+        <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/40 shadow-sm">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Payout bank details</p>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                Fill in your receiving bank account so your earnings can be paid out.
+              </p>
+            </div>
+            <CreditCard className="w-6 h-6 text-primary-500" />
+          </div>
+
+          <div className="mt-6 space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">Bank / Provider</label>
+              <input
+                value={bankName}
+                onChange={(e) => setBankName(e.target.value)}
+                className="mt-2 w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-sm text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="e.g. First Bank"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">Account Number</label>
+              <input
+                value={bankAccountNumber}
+                onChange={(e) => setBankAccountNumber(e.target.value)}
+                className="mt-2 w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3 text-sm text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="e.g. 0123456789"
+              />
+            </div>
+            {saveMessage && (
+              <p className="text-sm text-emerald-600 dark:text-emerald-400">{saveMessage}</p>
+            )}
+            <button
+              onClick={handleSaveProfile}
+              disabled={savingProfile}
+              className="mt-2 inline-flex items-center justify-center rounded-2xl bg-primary-600 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-primary-500/20 hover:bg-primary-500 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {savingProfile ? 'Saving...' : 'Save payout details'}
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Tabs list (Listings vs Reviews) */}

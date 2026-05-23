@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Order = require('../models/Order');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
@@ -32,17 +33,12 @@ const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // If it's the first user, make them Admin automatically for testing and setup convenience
-    const isFirstUser = (await User.countDocuments({})) === 0;
-
-    // Create user
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
       department,
       level,
-      isAdmin: isFirstUser, // Auto-admin for the first user
     });
 
     if (user) {
@@ -82,13 +78,15 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Check for user
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
 
-    // Check password
+    if (user.isBlocked) {
+      return res.status(403).json({ success: false, message: 'This account has been blocked. Contact support.' });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
@@ -106,6 +104,9 @@ const loginUser = async (req, res) => {
         isVerified: user.isVerified,
         ratingAverage: user.ratingAverage,
         ratingCount: user.ratingCount,
+        bankName: user.bankName || '',
+        bankAccountNumber: user.bankAccountNumber || '',
+        isBlocked: user.isBlocked || false,
         token: generateToken(user._id),
       },
     });
@@ -121,14 +122,59 @@ const loginUser = async (req, res) => {
 const getUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
-    if (user) {
-      return res.json({
-        success: true,
-        data: user,
-      });
-    } else {
+    if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
+
+    const completedSales = await Order.find({ sellerId: user._id, status: 'completed' });
+    const completedPurchases = await Order.find({ buyerId: user._id, status: 'completed' });
+
+    const totalEarned = completedSales.reduce(
+      (sum, order) => sum + (order.sellerAmount ?? order.amount * 0.9),
+      0,
+    );
+    const totalSpent = completedPurchases.reduce((sum, order) => sum + order.amount, 0);
+
+    return res.json({
+      success: true,
+      data: {
+        ...user.toObject(),
+        totalEarned,
+        totalSpent,
+        totalSales: completedSales.length,
+        totalPurchases: completedPurchases.length,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// @desc    Update current user profile bank details
+// @route   PUT /api/auth/me
+// @access  Private
+const updateUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const { name, department, level, bankName, bankAccountNumber } = req.body;
+
+    if (name) user.name = name;
+    if (department) user.department = department;
+    if (level) user.level = level;
+    if (bankName !== undefined) user.bankName = bankName;
+    if (bankAccountNumber !== undefined) user.bankAccountNumber = bankAccountNumber;
+
+    await user.save();
+
+    const safeUser = user.toObject();
+    delete safeUser.password;
+
+    return res.json({ success: true, data: safeUser });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ success: false, message: 'Server error' });
@@ -139,4 +185,5 @@ module.exports = {
   registerUser,
   loginUser,
   getUserProfile,
+  updateUserProfile,
 };

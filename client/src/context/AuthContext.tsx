@@ -11,6 +11,13 @@ interface User {
   isVerified: boolean;
   ratingAverage: number;
   ratingCount: number;
+  bankName?: string;
+  bankAccountNumber?: string;
+  isBlocked?: boolean;
+  totalEarned?: number;
+  totalSpent?: number;
+  totalSales?: number;
+  totalPurchases?: number;
 }
 
 interface AuthContextType {

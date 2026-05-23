@@ -1,20 +1,26 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import { SocketProvider } from './context/SocketContext';
-import { Navbar } from './components/Navbar';
-import { PrivateRoute } from './components/PrivateRoute';
-import { Login } from './pages/Login';
-import { Register } from './pages/Register';
-import { Dashboard } from './pages/Dashboard';
-import { AddProduct } from './pages/AddProduct';
-import { ProductDetails } from './pages/ProductDetails';
-import { OrdersPage } from './pages/OrdersPage';
-import { ChatPage } from './pages/ChatPage';
-import { ProfilePage } from './pages/ProfilePage';
-import { MockPayment } from './pages/MockPayment';
-import { AdminDashboard } from './pages/AdminDashboard';
-import './App.css';
+import React from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  Outlet,
+} from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { SocketProvider } from "./context/SocketContext";
+import { Navbar } from "./components/Navbar";
+import { PrivateRoute } from "./components/PrivateRoute";
+import { Login } from "./pages/Login";
+import { Register } from "./pages/Register";
+import { Dashboard } from "./pages/Dashboard";
+import { AddProduct } from "./pages/AddProduct";
+import { ProductDetails } from "./pages/ProductDetails";
+import { OrdersPage } from "./pages/OrdersPage";
+import { ChatPage } from "./pages/ChatPage";
+import { ProfilePage } from "./pages/ProfilePage";
+import { MockPayment } from "./pages/MockPayment";
+import { AdminDashboard } from "./pages/AdminDashboard";
+import "./App.css";
 
 const PrivateLayout: React.FC = () => {
   return (
@@ -47,6 +53,7 @@ function App() {
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/add-product" element={<AddProduct />} />
                 <Route path="/product/:id" element={<ProductDetails />} />
+                <Route path="/products/:id" element={<ProductDetails />} />
               </Route>
 
               {/* Private standalone route (Mock Paystack sandbox doesn't show store navigation) */}
@@ -70,4 +77,3 @@ function App() {
 }
 
 export default App;
-

@@ -6,6 +6,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 const connectDB = async () => {
   const db = require('./utils/db');
@@ -22,6 +23,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -64,6 +66,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/users', userRoutes);
 
 // Base route
 app.get('/', (req, res) => {
@@ -174,8 +177,34 @@ io.on('connection', (socket) => {
 
 // Start Server
 const PORT = process.env.PORT || 5000;
+
+const createDefaultAdmin = async () => {
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@system.com';
+  const adminPassword = process.env.ADMIN_PASSWORD || 'admin567';
+  const adminName = process.env.ADMIN_NAME || 'Platform Admin';
+
+  const existingAdmin = await User.findOne({ email: adminEmail });
+  if (!existingAdmin) {
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(adminPassword, salt);
+
+    await User.create({
+      name: adminName,
+      email: adminEmail,
+      password: hashedPassword,
+      department: 'Administration',
+      level: 'Admin',
+      isAdmin: true,
+      isVerified: true,
+    });
+
+    console.log(`Default admin user created: ${adminEmail}`);
+  }
+};
+
 const startServer = async () => {
   await connectDB();
+  await createDefaultAdmin();
   server.listen(PORT, () => {
     console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
   });

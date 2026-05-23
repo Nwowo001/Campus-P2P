@@ -98,6 +98,10 @@ const getAdminStats = async (req, res) => {
     // Calculate total volume (sum of completed orders amount)
     const completedOrders = await require('../models/Order').find({ status: 'completed' });
     const totalVolume = completedOrders.reduce((sum, order) => sum + order.amount, 0);
+    const totalCommission = completedOrders.reduce(
+      (sum, order) => sum + (order.platformAmount ?? order.amount * 0.1),
+      0,
+    );
 
     const activeProductsCount = await require('../models/Product').countDocuments({ isSold: false });
 
@@ -108,8 +112,9 @@ const getAdminStats = async (req, res) => {
         totalReports,
         totalOrders,
         totalVolume,
-        activeProductsCount
-      }
+        totalCommission,
+        activeProductsCount,
+      },
     });
   } catch (error) {
     console.error(error);

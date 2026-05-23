@@ -56,11 +56,16 @@ const initializeOrder = async (req, res) => {
     }
 
     // Create the order
+    const sellerAmount = Number((product.price * 0.9).toFixed(2));
+    const platformAmount = Number((product.price * 0.1).toFixed(2));
+
     const order = await Order.create({
       buyerId: req.user.id,
       sellerId: product.sellerId,
       productId: product._id,
       amount: product.price,
+      sellerAmount,
+      platformAmount,
       status: 'pending',
       paymentReference: reference,
       escrowHeld: false,

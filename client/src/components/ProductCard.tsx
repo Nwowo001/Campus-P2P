@@ -43,7 +43,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   return (
     <Link
-      to={`/products/${product._id}`}
+      to={`/product/${product._id}`}
       className="group block relative rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/40 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 dark:hover:border-slate-700/60"
     >
       {/* Product Image */}

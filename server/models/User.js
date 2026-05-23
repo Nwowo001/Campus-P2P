@@ -42,6 +42,20 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    bankName: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    bankAccountNumber: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    isBlocked: {
+      type: Boolean,
+      default: false,
+    },
     isAdmin: {
       type: Boolean,
       default: false,

@@ -13,6 +13,7 @@ import {
 
 export const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<any>(null);
+  const [users, setUsers] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -22,9 +23,10 @@ export const AdminDashboard: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      const [statsRes, reportsRes] = await Promise.all([
+      const [statsRes, reportsRes, usersRes] = await Promise.all([
         API.get('/reports/stats'),
         API.get('/reports'),
+        API.get('/users'),
       ]);
 
       if (statsRes.data.success) {
@@ -32,6 +34,9 @@ export const AdminDashboard: React.FC = () => {
       }
       if (reportsRes.data.success) {
         setReports(reportsRes.data.data);
+      }
+      if (usersRes.data.success) {
+        setUsers(usersRes.data.data);
       }
     } catch (err) {
       console.error(err);
@@ -65,16 +70,19 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const handleBlockUser = async (userId: string, reportId: string) => {
-    setActionLoadingId(reportId);
+    setActionLoadingId(userId);
     try {
-      // Simulate/Trigger blocking user or deleting items. 
-      // We will make a toast and remove report as resolved.
-      alert(`User ID ${userId} has been suspended (simulated).`);
+      // Block the reported user and remove the report from the list
+      const blockRes = await API.put(`/users/${userId}/block`);
+      if (blockRes.data.success) {
+        setUsers((prev) => prev.map((user) => (user._id === userId ? blockRes.data.data : user)));
+      }
+
       await API.delete(`/reports/${reportId}`);
       setReports((prev) => prev.filter((r) => r._id !== reportId));
       setStats((prev: any) => ({
         ...prev,
-        totalReports: Math.max(0, prev.totalReports - 1)
+        totalReports: Math.max(0, prev.totalReports - 1),
       }));
     } catch (err) {
       console.error(err);
@@ -164,6 +172,17 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
+          {/* Platform Commission */}
+          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/40 shadow-sm flex items-center space-x-4">
+            <div className="p-3 bg-yellow-50 dark:bg-yellow-950/20 text-yellow-500 rounded-xl">
+              <DollarSign className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Platform Commission</p>
+              <h3 className="text-xl font-extrabold text-slate-850 dark:text-white">{formatPrice(stats.totalCommission || 0)}</h3>
+            </div>
+          </div>
+
           {/* Active Listings */}
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/40 shadow-sm flex items-center space-x-4">
             <div className="p-3 bg-purple-50 dark:bg-purple-950/20 text-purple-550 rounded-xl">
@@ -176,6 +195,92 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* User management */}
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm">
+        <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <h3 className="font-bold text-slate-800 dark:text-white flex items-center space-x-2">
+            <Users className="w-5 h-5 text-slate-400" />
+            <span>Student Accounts ({users.length})</span>
+          </h3>
+        </div>
+
+        {users.length === 0 ? (
+          <div className="p-12 text-center text-slate-450 dark:text-slate-500">
+            <p className="font-bold text-slate-700 dark:text-white">No users found</p>
+            <p className="text-sm max-w-xs mx-auto mt-1">There are currently no registered student accounts.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-slate-950 text-slate-400 dark:text-slate-500 font-bold border-b border-slate-250 dark:border-slate-800">
+                  <th className="p-4">Name</th>
+                  <th className="p-4">Email</th>
+                  <th className="p-4">Role</th>
+                  <th className="p-4">Status</th>
+                  <th className="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
+                {users.map((user) => (
+                  <tr key={user._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-850/20">
+                    <td className="p-4 font-semibold text-slate-800 dark:text-slate-200">{user.name}</td>
+                    <td className="p-4 text-slate-600 dark:text-slate-300">{user.email}</td>
+                    <td className="p-4 text-slate-600 dark:text-slate-300">{user.isAdmin ? 'Admin' : 'Student'}</td>
+                    <td className="p-4 text-slate-600 dark:text-slate-300">{user.isBlocked ? 'Blocked' : 'Active'}</td>
+                    <td className="p-4 text-right">
+                      <div className="flex flex-wrap justify-end gap-2">
+                        <button
+                          onClick={async () => {
+                            setActionLoadingId(user._id);
+                            try {
+                              const res = await API.put(`/users/${user._id}/block`);
+                              if (res.data.success) {
+                                setUsers((prev) => prev.map((item) => (item._id === user._id ? res.data.data : item)));
+                              }
+                            } catch (err) {
+                              console.error(err);
+                              alert('Failed to update user status');
+                            } finally {
+                              setActionLoadingId(null);
+                            }
+                          }}
+                          disabled={actionLoadingId === user._id}
+                          className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-850 disabled:opacity-50"
+                        >
+                          {user.isBlocked ? 'Unblock' : 'Block'}
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (!window.confirm('Delete this user account?')) return;
+                            setActionLoadingId(user._id);
+                            try {
+                              const res = await API.delete(`/users/${user._id}`);
+                              if (res.data.success) {
+                                setUsers((prev) => prev.filter((item) => item._id !== user._id));
+                              }
+                            } catch (err) {
+                              console.error(err);
+                              alert('Failed to delete user');
+                            } finally {
+                              setActionLoadingId(null);
+                            }
+                          }}
+                          disabled={actionLoadingId === user._id}
+                          className="px-3 py-1.5 rounded-lg bg-red-650/10 hover:bg-red-650/20 text-xs font-semibold text-red-600 dark:text-red-400 disabled:opacity-50"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Reports Listing Table */}
       <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm">
