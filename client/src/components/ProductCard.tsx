@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Star, ShieldAlert } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import { Star } from "lucide-react";
 
 interface SellerId {
   _id: string;
@@ -25,14 +25,17 @@ interface ProductCardProps {
   currentUserId?: string;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId }) => {
-  const seller = typeof product.sellerId === 'object' ? product.sellerId : null;
+export const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  currentUserId,
+}) => {
+  const seller = typeof product.sellerId === "object" ? product.sellerId : null;
   const isOwner = seller && currentUserId === seller._id;
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price);
@@ -51,7 +54,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId
           className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
           onError={(e) => {
             // Fallback for broken images
-            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600&auto=format&fit=crop';
+            (e.target as HTMLImageElement).src =
+              "https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600&auto=format&fit=crop";
           }}
         />
 
@@ -82,7 +86,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId
           <h3 className="font-semibold text-slate-800 dark:text-slate-200 line-clamp-1 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
             {product.title}
           </h3>
-          
+
           <div className="mt-1 flex items-center justify-between">
             <span className="text-lg font-bold text-slate-900 dark:text-white">
               {formatPrice(product.price)}
@@ -99,7 +103,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, currentUserId
             <div className="flex items-center space-x-1 shrink-0">
               <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
               <span className="font-semibold text-slate-700 dark:text-slate-200">
-                {seller.ratingAverage > 0 ? seller.ratingAverage.toFixed(1) : 'New'}
+                {seller.ratingAverage > 0
+                  ? seller.ratingAverage.toFixed(1)
+                  : "New"}
               </span>
               {seller.ratingCount > 0 && (
                 <span className="text-slate-400 dark:text-slate-500">

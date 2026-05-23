@@ -1,45 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import API from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import { ProductCard } from '../components/ProductCard';
-import { 
-  User as UserIcon, 
-  BookOpen, 
-  GraduationCap, 
-  Mail, 
-  Star, 
-  LogOut, 
-  Settings, 
-  ShoppingBag, 
-  MessageSquare,
-  ClipboardList
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import API from "../services/api";
+import { useAuth } from "../context/AuthContext";
+import { ProductCard } from "../components/ProductCard";
+import {
+  User as UserIcon,
+  BookOpen,
+  GraduationCap,
+  Mail,
+  Star,
+  LogOut,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const ProfilePage: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  
+
   const [activeProducts, setActiveProducts] = useState<any[]>([]);
   const [soldProducts, setSoldProducts] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [subTab, setSubTab] = useState<'listings' | 'reviews'>('listings');
+  const [subTab, setSubTab] = useState<"listings" | "reviews">("listings");
 
   const fetchProfileData = async () => {
     if (!user) return;
     setLoading(true);
     try {
       // 1. Fetch user's listings
-      const productsRes = await API.get('/products');
+      const productsRes = await API.get("/products");
       if (productsRes.data.success) {
         const allUserItems = productsRes.data.data.filter(
-          (p: any) => (typeof p.sellerId === 'object' ? p.sellerId._id : p.sellerId) === user._id
+          (p: any) =>
+            (typeof p.sellerId === "object" ? p.sellerId._id : p.sellerId) ===
+            user._id,
         );
         setActiveProducts(allUserItems.filter((p: any) => !p.isSold));
         setSoldProducts(allUserItems.filter((p: any) => p.isSold));
       }
-
       // 2. Fetch reviews received by user
       const reviewsRes = await API.get(`/reviews/user/${user._id}`);
       if (reviewsRes.data.success) {
@@ -58,7 +55,7 @@ export const ProfilePage: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   if (loading) {
@@ -66,7 +63,9 @@ export const ProfilePage: React.FC = () => {
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="flex flex-col items-center space-y-3">
           <div className="w-10 h-10 border-4 border-t-primary-500 border-slate-200 dark:border-slate-800 rounded-full animate-spin font-sans"></div>
-          <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">Loading student profile...</p>
+          <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+            Loading student profile...
+          </p>
         </div>
       </div>
     );
@@ -100,12 +99,14 @@ export const ProfilePage: React.FC = () => {
                 <span>{user?.level}</span>
               </span>
             </div>
-            
+
             {/* Rating Stars summary */}
             <div className="flex items-center justify-center sm:justify-start space-x-1 text-sm font-semibold">
               <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
               <span className="text-slate-800 dark:text-slate-200">
-                {user && user.ratingAverage > 0 ? user.ratingAverage.toFixed(1) : 'New User'}
+                {user && user.ratingAverage > 0
+                  ? user.ratingAverage.toFixed(1)
+                  : "New User"}
               </span>
               {user && user.ratingCount > 0 && (
                 <span className="text-slate-400 font-medium">
@@ -130,21 +131,21 @@ export const ProfilePage: React.FC = () => {
       <div className="space-y-5">
         <div className="flex border-b border-slate-200 dark:border-slate-800">
           <button
-            onClick={() => setSubTab('listings')}
+            onClick={() => setSubTab("listings")}
             className={`py-3 px-6 text-sm font-bold border-b-2 transition-all ${
-              subTab === 'listings'
-                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+              subTab === "listings"
+                ? "border-primary-500 text-primary-600 dark:text-primary-400"
+                : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
             }`}
           >
             My Store Listings
           </button>
           <button
-            onClick={() => setSubTab('reviews')}
+            onClick={() => setSubTab("reviews")}
             className={`py-3 px-6 text-sm font-bold border-b-2 transition-all ${
-              subTab === 'reviews'
-                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+              subTab === "reviews"
+                ? "border-primary-500 text-primary-600 dark:text-primary-400"
+                : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
             }`}
           >
             Received Reviews ({reviews.length})
@@ -152,7 +153,7 @@ export const ProfilePage: React.FC = () => {
         </div>
 
         {/* Listings Tab */}
-        {subTab === 'listings' && (
+        {subTab === "listings" && (
           <div className="space-y-8">
             {/* Active products */}
             <div className="space-y-3">
@@ -166,7 +167,11 @@ export const ProfilePage: React.FC = () => {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                   {activeProducts.map((p) => (
-                    <ProductCard key={p._id} product={p} currentUserId={user?._id} />
+                    <ProductCard
+                      key={p._id}
+                      product={p}
+                      currentUserId={user?._id}
+                    />
                   ))}
                 </div>
               )}
@@ -184,7 +189,11 @@ export const ProfilePage: React.FC = () => {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 opacity-85">
                   {soldProducts.map((p) => (
-                    <ProductCard key={p._id} product={p} currentUserId={user?._id} />
+                    <ProductCard
+                      key={p._id}
+                      product={p}
+                      currentUserId={user?._id}
+                    />
                   ))}
                 </div>
               )}
@@ -193,31 +202,37 @@ export const ProfilePage: React.FC = () => {
         )}
 
         {/* Reviews Tab */}
-        {subTab === 'reviews' && (
+        {subTab === "reviews" && (
           <div className="space-y-4 max-w-2xl">
             {reviews.length === 0 ? (
               <div className="p-12 text-center text-slate-450 dark:text-slate-500 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl">
-                No reviews received yet. Completed transactions will accumulate ratings here.
+                No reviews received yet. Completed transactions will accumulate
+                ratings here.
               </div>
             ) : (
               reviews.map((r) => (
-                <div 
-                  key={r._id} 
+                <div
+                  key={r._id}
                   className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/40 shadow-sm space-y-2.5"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-950 flex items-center justify-center text-slate-400 text-xs shrink-0 font-sans font-bold">
-                        {r.reviewerId?.name ? r.reviewerId.name.substring(0, 2).toUpperCase() : 'US'}
+                        {r.reviewerId?.name
+                          ? r.reviewerId.name.substring(0, 2).toUpperCase()
+                          : "US"}
                       </div>
                       <span className="font-semibold text-sm text-slate-800 dark:text-slate-200">
-                        {r.reviewerId?.name || 'Deleted Account'}
+                        {r.reviewerId?.name || "Deleted Account"}
                       </span>
                     </div>
                     {/* Stars */}
                     <div className="flex space-x-0.5 text-amber-400 fill-amber-400 shrink-0">
                       {Array.from({ length: r.rating }).map((_, idx) => (
-                        <Star key={idx} className="w-3.5 h-3.5 fill-amber-400" />
+                        <Star
+                          key={idx}
+                          className="w-3.5 h-3.5 fill-amber-400"
+                        />
                       ))}
                     </div>
                   </div>

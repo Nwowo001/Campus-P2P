@@ -1,39 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import API from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import { useSocket } from '../context/SocketContext';
-import { ReportModal } from '../components/ReportModal';
-import { 
-  MessageSquare, 
-  ShoppingBag, 
-  Trash2, 
-  User as UserIcon, 
-  Star, 
-  Calendar, 
-  BookOpen, 
-  GraduationCap, 
-  ShieldAlert, 
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import API from "../services/api";
+import { useAuth } from "../context/AuthContext";
+import { ReportModal } from "../components/ReportModal";
+import {
+  MessageSquare,
+  ShoppingBag,
+  Trash2,
+  User as UserIcon,
+  Star,
+  Calendar,
+  BookOpen,
+  GraduationCap,
+  ShieldAlert,
   ArrowLeft,
-  Lock
-} from 'lucide-react';
+  Lock,
+} from "lucide-react";
 
 export const ProductDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
-  
+
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  
+  const [error, setError] = useState("");
+
   // Modals & buying states
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
 
   const fetchProduct = async () => {
     setLoading(true);
-    setError('');
+    setError("");
     try {
       const res = await API.get(`/products/${id}`);
       if (res.data.success) {
@@ -41,7 +40,7 @@ export const ProductDetails: React.FC = () => {
       }
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.message || 'Product not found');
+      setError(err.response?.data?.message || "Product not found");
     } finally {
       setLoading(false);
     }
@@ -54,9 +53,11 @@ export const ProductDetails: React.FC = () => {
   const handleBuyNow = async () => {
     if (!product || purchasing) return;
     setPurchasing(true);
-    
+
     try {
-      const res = await API.post('/payments/initialize', { productId: product._id });
+      const res = await API.post("/payments/initialize", {
+        productId: product._id,
+      });
       if (res.data.success) {
         const { authorization_url } = res.data.data;
         // Redirect to Paystack (or mock payment checkout screen)
@@ -64,7 +65,9 @@ export const ProductDetails: React.FC = () => {
       }
     } catch (err: any) {
       console.error(err);
-      alert(err.response?.data?.message || 'Failed to initialize purchase flow');
+      alert(
+        err.response?.data?.message || "Failed to initialize purchase flow",
+      );
     } finally {
       setPurchasing(false);
     }
@@ -72,38 +75,43 @@ export const ProductDetails: React.FC = () => {
 
   const handleChatWithSeller = () => {
     if (!product || !product.sellerId) return;
-    const sellerId = typeof product.sellerId === 'object' ? product.sellerId._id : product.sellerId;
-    const sellerName = typeof product.sellerId === 'object' ? product.sellerId.name : 'Seller';
-    
+    const sellerId =
+      typeof product.sellerId === "object"
+        ? product.sellerId._id
+        : product.sellerId;
+    const sellerName =
+      typeof product.sellerId === "object" ? product.sellerId.name : "Seller";
+
     // Pass state to chat page so it auto-opens contact
-    navigate('/chat', { 
-      state: { 
+    navigate("/chat", {
+      state: {
         autoSelectContact: {
           _id: sellerId,
-          name: sellerName
-        }
-      } 
+          name: sellerName,
+        },
+      },
     });
   };
 
   const handleDeleteListing = async () => {
-    if (!window.confirm('Are you sure you want to delete this listing?')) return;
-    
+    if (!window.confirm("Are you sure you want to delete this listing?"))
+      return;
+
     try {
       const res = await API.delete(`/products/${product._id}`);
       if (res.data.success) {
-        navigate('/');
+        navigate("/");
       }
     } catch (err) {
       console.error(err);
-      alert('Failed to delete listing');
+      alert("Failed to delete listing");
     }
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price);
@@ -114,7 +122,9 @@ export const ProductDetails: React.FC = () => {
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="flex flex-col items-center space-y-3">
           <div className="w-10 h-10 border-4 border-t-primary-500 border-slate-200 dark:border-slate-800 rounded-full animate-spin"></div>
-          <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">Loading item specifications...</p>
+          <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+            Loading item specifications...
+          </p>
         </div>
       </div>
     );
@@ -123,8 +133,13 @@ export const ProductDetails: React.FC = () => {
   if (error || !product) {
     return (
       <div className="max-w-md mx-auto py-12 text-center space-y-4">
-        <div className="text-red-500 font-bold">{error || 'Something went wrong'}</div>
-        <Link to="/" className="inline-flex items-center space-x-1.5 text-primary-500 font-bold hover:underline">
+        <div className="text-red-500 font-bold">
+          {error || "Something went wrong"}
+        </div>
+        <Link
+          to="/"
+          className="inline-flex items-center space-x-1.5 text-primary-500 font-bold hover:underline"
+        >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Dashboard</span>
         </Link>
@@ -132,13 +147,16 @@ export const ProductDetails: React.FC = () => {
     );
   }
 
-  const seller = typeof product.sellerId === 'object' ? product.sellerId : null;
+  const seller = typeof product.sellerId === "object" ? product.sellerId : null;
   const isOwner = seller && user?._id === seller._id;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 fade-in">
       {/* Back button */}
-      <Link to="/" className="inline-flex items-center space-x-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-350">
+      <Link
+        to="/"
+        className="inline-flex items-center space-x-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-350"
+      >
         <ArrowLeft className="w-4 h-4" />
         <span>Back to listings</span>
       </Link>
@@ -152,7 +170,8 @@ export const ProductDetails: React.FC = () => {
               alt={product.title}
               className="h-full w-full object-cover object-center"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600&auto=format&fit=crop';
+                (e.target as HTMLImageElement).src =
+                  "https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=600&auto=format&fit=crop";
               }}
             />
             {product.isSold && (
@@ -174,7 +193,11 @@ export const ProductDetails: React.FC = () => {
                 {product.category}
               </span>
               <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
-                Listed {new Date(product.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                Listed{" "}
+                {new Date(product.createdAt).toLocaleDateString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                })}
               </span>
             </div>
 
@@ -187,7 +210,9 @@ export const ProductDetails: React.FC = () => {
             </div>
 
             <div className="space-y-1.5 pt-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-450">Item Description</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-450">
+                Item Description
+              </h3>
               <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-sans whitespace-pre-wrap">
                 {product.description}
               </p>
@@ -198,8 +223,13 @@ export const ProductDetails: React.FC = () => {
               <div className="p-3.5 bg-primary-50 dark:bg-primary-950/20 rounded-2xl border border-primary-200/60 dark:border-primary-900/30 flex items-start space-x-2.5 text-xs text-primary-800 dark:text-primary-350 leading-relaxed">
                 <Lock className="w-4 h-4 shrink-0 text-primary-500 mt-0.5" />
                 <div>
-                  <strong className="text-primary-900 dark:text-primary-300 font-bold">Escrow Protection Active</strong>
-                  <p className="mt-0.5">Your money is held securely by CampusMart. The seller will only be paid once you receive and verify the item.</p>
+                  <strong className="text-primary-900 dark:text-primary-300 font-bold">
+                    Escrow Protection Active
+                  </strong>
+                  <p className="mt-0.5">
+                    Your money is held securely by CampusMart. The seller will
+                    only be paid once you receive and verify the item.
+                  </p>
                 </div>
               </div>
             )}
@@ -231,7 +261,9 @@ export const ProductDetails: React.FC = () => {
                     className="w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-2xl bg-primary-600 hover:bg-primary-500 text-white font-bold shadow-lg shadow-primary-500/20 hover:shadow-primary-500/35 hover:scale-[1.01] active:scale-95 transition-all duration-200 disabled:opacity-50"
                   >
                     <ShoppingBag className="w-4 h-4" />
-                    <span>{purchasing ? 'Initializing Checkout...' : 'Buy Now'}</span>
+                    <span>
+                      {purchasing ? "Initializing Checkout..." : "Buy Now"}
+                    </span>
                   </button>
 
                   <button
@@ -249,7 +281,9 @@ export const ProductDetails: React.FC = () => {
           {/* Seller Profile Summary Card */}
           {seller && (
             <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/40 shadow-sm space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-450">Seller Information</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-450">
+                Seller Information
+              </h3>
               <div className="flex items-center space-x-3.5">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-slate-200 to-slate-100 dark:from-slate-800 dark:to-slate-850 flex items-center justify-center text-slate-500 shrink-0">
                   <UserIcon className="w-6 h-6" />
@@ -262,7 +296,9 @@ export const ProductDetails: React.FC = () => {
                     <div className="flex items-center space-x-1">
                       <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                       <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                        {seller.ratingAverage > 0 ? seller.ratingAverage.toFixed(1) : 'New Seller'}
+                        {seller.ratingAverage > 0
+                          ? seller.ratingAverage.toFixed(1)
+                          : "New Seller"}
                       </span>
                     </div>
                     {seller.ratingCount > 0 && (
@@ -286,7 +322,13 @@ export const ProductDetails: React.FC = () => {
                 </div>
                 <div className="flex items-center space-x-1.5 col-span-2">
                   <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span>Joined {new Date(seller.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}</span>
+                  <span>
+                    Joined{" "}
+                    {new Date(seller.createdAt).toLocaleDateString(undefined, {
+                      year: "numeric",
+                      month: "long",
+                    })}
+                  </span>
                 </div>
               </div>
 

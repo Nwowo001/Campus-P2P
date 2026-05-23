@@ -1,16 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-import API from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import { useSocket } from '../context/SocketContext';
-import { 
-  Send, 
-  MessageSquare, 
-  Search, 
-  User as UserIcon, 
-  ChevronRight,
-  ShieldAlert
-} from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
+import API from "../services/api";
+import { useAuth } from "../context/AuthContext";
+import { useSocket } from "../context/SocketContext";
+import { Send, MessageSquare, Search, User as UserIcon } from "lucide-react";
 
 interface Contact {
   _id: string;
@@ -40,14 +33,14 @@ export const ChatPage: React.FC = () => {
   const { user } = useAuth();
   const { socket, isUserOnline } = useSocket();
   const location = useLocation();
-  
+
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [inputText, setInputText] = useState('');
+  const [inputText, setInputText] = useState("");
   const [contactsLoading, setContactsLoading] = useState(true);
   const [messagesLoading, setMessagesLoading] = useState(false);
-  const [contactSearch, setContactSearch] = useState('');
+  const [contactSearch, setContactSearch] = useState("");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -55,10 +48,10 @@ export const ChatPage: React.FC = () => {
   const fetchConversations = async (autoSelect?: Contact) => {
     setContactsLoading(true);
     try {
-      const res = await API.get('/chat/conversations');
+      const res = await API.get("/chat/conversations");
       if (res.data.success) {
         let list: Conversation[] = res.data.data;
-        
+
         // If we navigated here with autoSelectContact state (e.g. from Product Details)
         if (autoSelect) {
           // Check if contact already exists in list
@@ -68,20 +61,20 @@ export const ChatPage: React.FC = () => {
             const newConv: Conversation = {
               user: autoSelect,
               lastMessage: {
-                text: 'Start typing to begin conversation...',
+                text: "Start typing to begin conversation...",
                 createdAt: new Date().toISOString(),
-                senderId: '',
+                senderId: "",
               },
             };
             list = [newConv, ...list];
           }
           setSelectedContact(autoSelect);
         }
-        
+
         setConversations(list);
       }
     } catch (err) {
-      console.error('Error fetching conversations:', err);
+      console.error("Error fetching conversations:", err);
     } finally {
       setContactsLoading(false);
     }
@@ -96,7 +89,7 @@ export const ChatPage: React.FC = () => {
   // Fetch messages when selected contact changes
   useEffect(() => {
     if (!selectedContact) return;
-    
+
     const fetchMessages = async () => {
       setMessagesLoading(true);
       try {
@@ -105,7 +98,7 @@ export const ChatPage: React.FC = () => {
           setMessages(res.data.data);
         }
       } catch (err) {
-        console.error('Error fetching messages:', err);
+        console.error("Error fetching messages:", err);
       } finally {
         setMessagesLoading(false);
       }
@@ -116,7 +109,7 @@ export const ChatPage: React.FC = () => {
 
   // Scroll to bottom helper
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -130,17 +123,22 @@ export const ChatPage: React.FC = () => {
     const handleReceiveMessage = (msg: Message) => {
       // If message belongs to selected contact conversation
       if (
-        selectedContact && 
-        ((msg.senderId === selectedContact._id && msg.receiverId === user?._id) || 
-         (msg.senderId === user?._id && msg.receiverId === selectedContact._id))
+        selectedContact &&
+        ((msg.senderId === selectedContact._id &&
+          msg.receiverId === user?._id) ||
+          (msg.senderId === user?._id &&
+            msg.receiverId === selectedContact._id))
       ) {
         setMessages((prev) => [...prev, msg]);
       }
 
       // Update the conversations list preview text and order
       setConversations((prev) => {
-        const otherPartyId = msg.senderId === user?._id ? msg.receiverId : msg.senderId;
-        const matchingConvIndex = prev.findIndex((c) => c.user._id === otherPartyId);
+        const otherPartyId =
+          msg.senderId === user?._id ? msg.receiverId : msg.senderId;
+        const matchingConvIndex = prev.findIndex(
+          (c) => c.user._id === otherPartyId,
+        );
 
         if (matchingConvIndex !== -1) {
           const updated = [...prev];
@@ -160,10 +158,10 @@ export const ChatPage: React.FC = () => {
       });
     };
 
-    socket.on('receive_message', handleReceiveMessage);
+    socket.on("receive_message", handleReceiveMessage);
 
     return () => {
-      socket.off('receive_message', handleReceiveMessage);
+      socket.off("receive_message", handleReceiveMessage);
     };
   }, [socket, selectedContact, user]);
 
@@ -177,23 +175,22 @@ export const ChatPage: React.FC = () => {
     };
 
     // Emit via Socket.io
-    socket.emit('send_message', messageData, (response: any) => {
+    socket.emit("send_message", messageData, (response: any) => {
       if (response && response.success) {
-        setInputText('');
+        setInputText("");
       } else {
-        alert('Failed to send message: Server error');
+        alert("Failed to send message: Server error");
       }
     });
   };
 
-  const filteredConversations = conversations.filter((c) => 
-    c.user.name.toLowerCase().includes(contactSearch.toLowerCase())
+  const filteredConversations = conversations.filter((c) =>
+    c.user.name.toLowerCase().includes(contactSearch.toLowerCase()),
   );
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 fade-in">
       <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden h-[75vh] flex">
-        
         {/* Left pane: Contact listing list */}
         <div className="w-full md:w-80 shrink-0 border-r border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50/50 dark:bg-slate-900/60 h-full">
           {/* Header & Search */}
@@ -239,8 +236,8 @@ export const ChatPage: React.FC = () => {
                     onClick={() => setSelectedContact(conv.user)}
                     className={`w-full text-left p-4 flex items-center space-x-3 transition-colors ${
                       isSelected
-                        ? 'bg-primary-50/50 dark:bg-primary-950/20 border-l-4 border-l-primary-500'
-                        : 'hover:bg-slate-100/50 dark:hover:bg-slate-850/40'
+                        ? "bg-primary-50/50 dark:bg-primary-950/20 border-l-4 border-l-primary-500"
+                        : "hover:bg-slate-100/50 dark:hover:bg-slate-850/40"
                     }`}
                   >
                     {/* Contact Avatar & Status bubble */}
@@ -249,10 +246,12 @@ export const ChatPage: React.FC = () => {
                         <UserIcon className="w-5 h-5" />
                       </div>
                       {/* status dot */}
-                      <span 
+                      <span
                         className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white dark:border-slate-900 transition-colors ${
-                          isOnline ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-700'
-                        }`} 
+                          isOnline
+                            ? "bg-green-500"
+                            : "bg-slate-300 dark:bg-slate-700"
+                        }`}
                       />
                     </div>
 
@@ -262,14 +261,16 @@ export const ChatPage: React.FC = () => {
                           {conv.user.name}
                         </h4>
                         <span className="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">
-                          {new Date(conv.lastMessage.createdAt).toLocaleDateString(undefined, {
-                            month: 'short',
-                            day: 'numeric'
+                          {new Date(
+                            conv.lastMessage.createdAt,
+                          ).toLocaleDateString(undefined, {
+                            month: "short",
+                            day: "numeric",
                           })}
                         </span>
                       </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5 font-medium">
-                        {conv.lastMessage.senderId === user?._id ? 'You: ' : ''}
+                        {conv.lastMessage.senderId === user?._id ? "You: " : ""}
                         {conv.lastMessage.text}
                       </p>
                     </div>
@@ -291,10 +292,12 @@ export const ChatPage: React.FC = () => {
                     <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center font-bold">
                       <UserIcon className="w-4.5 h-4.5" />
                     </div>
-                    <span 
+                    <span
                       className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border border-white dark:border-slate-900 ${
-                        isUserOnline(selectedContact._id) ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-700'
-                      }`} 
+                        isUserOnline(selectedContact._id)
+                          ? "bg-green-500"
+                          : "bg-slate-300 dark:bg-slate-700"
+                      }`}
                     />
                   </div>
                   <div>
@@ -302,7 +305,7 @@ export const ChatPage: React.FC = () => {
                       {selectedContact.name}
                     </h3>
                     <p className="text-[10px] text-slate-450 dark:text-slate-500">
-                      {isUserOnline(selectedContact._id) ? 'Online' : 'Offline'}
+                      {isUserOnline(selectedContact._id) ? "Online" : "Offline"}
                     </p>
                   </div>
                 </div>
@@ -311,11 +314,15 @@ export const ChatPage: React.FC = () => {
               {/* Chat messages stream */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50 dark:bg-slate-950/20 scrollbar-thin">
                 {messagesLoading ? (
-                  <div className="text-center py-6 text-xs text-slate-400">Loading conversation history...</div>
+                  <div className="text-center py-6 text-xs text-slate-400">
+                    Loading conversation history...
+                  </div>
                 ) : messages.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center text-slate-400 space-y-2">
                     <MessageSquare className="w-8 h-8 text-slate-300 dark:text-slate-800" />
-                    <p className="text-xs">Send a message to begin trading safely.</p>
+                    <p className="text-xs">
+                      Send a message to begin trading safely.
+                    </p>
                   </div>
                 ) : (
                   messages.map((msg, index) => {
@@ -323,24 +330,28 @@ export const ChatPage: React.FC = () => {
                     return (
                       <div
                         key={msg._id || index}
-                        className={`flex ${isSender ? 'justify-end' : 'justify-start'} w-full fade-in`}
+                        className={`flex ${isSender ? "justify-end" : "justify-start"} w-full fade-in`}
                       >
                         <div
                           className={`max-w-[70%] rounded-2xl px-4 py-2.5 shadow-sm text-sm font-medium ${
                             isSender
-                              ? 'bg-primary-600 text-white rounded-br-none'
-                              : 'bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/40 text-slate-900 dark:text-slate-100 rounded-bl-none'
+                              ? "bg-primary-600 text-white rounded-br-none"
+                              : "bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/40 text-slate-900 dark:text-slate-100 rounded-bl-none"
                           }`}
                         >
-                          <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
-                          <span 
+                          <p className="leading-relaxed whitespace-pre-wrap">
+                            {msg.text}
+                          </p>
+                          <span
                             className={`block text-[9px] mt-1 text-right ${
-                              isSender ? 'text-white/60' : 'text-slate-400 dark:text-slate-500'
+                              isSender
+                                ? "text-white/60"
+                                : "text-slate-400 dark:text-slate-500"
                             }`}
                           >
                             {new Date(msg.createdAt).toLocaleTimeString([], {
-                              hour: '2-digit',
-                              minute: '2-digit',
+                              hour: "2-digit",
+                              minute: "2-digit",
                             })}
                           </span>
                         </div>
@@ -352,7 +363,10 @@ export const ChatPage: React.FC = () => {
               </div>
 
               {/* Message Input toolbar */}
-              <form onSubmit={handleSendMessage} className="p-4 border-t border-slate-200 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-900 flex items-center space-x-2.5">
+              <form
+                onSubmit={handleSendMessage}
+                className="p-4 border-t border-slate-200 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-900 flex items-center space-x-2.5"
+              >
                 <input
                   type="text"
                   value={inputText}
@@ -374,9 +388,12 @@ export const ChatPage: React.FC = () => {
               <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-3xl">
                 <MessageSquare className="w-10 h-10 text-slate-350" />
               </div>
-              <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300">Select a Conversation</h3>
+              <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300">
+                Select a Conversation
+              </h3>
               <p className="text-xs max-w-xs leading-relaxed text-slate-500 dark:text-slate-450">
-                Choose a contact from the left list, or start a chat from any product detail page.
+                Choose a contact from the left list, or start a chat from any
+                product detail page.
               </p>
             </div>
           )}
