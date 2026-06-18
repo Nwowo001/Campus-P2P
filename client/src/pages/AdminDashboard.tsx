@@ -8,7 +8,6 @@ import {
   Trash2,
   CheckCircle,
   FileText,
-  DollarSign,
 } from "lucide-react";
 
 export const AdminDashboard: React.FC = () => {
@@ -145,7 +144,7 @@ export const AdminDashboard: React.FC = () => {
           {/* Total Volume */}
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/40 shadow-sm flex items-center space-x-4">
             <div className="p-3 bg-green-50 dark:bg-green-950/20 text-green-500 rounded-xl">
-              <DollarSign className="w-6 h-6" />
+              ₦ {/* <DollarSign className="w-6 h-6" /> */}
             </div>
             <div>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
@@ -190,7 +189,7 @@ export const AdminDashboard: React.FC = () => {
           {/* Platform Commission */}
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/40 shadow-sm flex items-center space-x-4">
             <div className="p-3 bg-yellow-50 dark:bg-yellow-950/20 text-yellow-500 rounded-xl">
-              <DollarSign className="w-6 h-6" />
+              ₦ {/* <DollarSign className="w-6 h-6" /> */}
             </div>
             <div>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">

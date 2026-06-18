@@ -1,32 +1,32 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { ShoppingBag, Mail, Lock, ArrowRight, Sun, Moon } from 'lucide-react';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { ShoppingBag, Mail, Lock, ArrowRight, Sun, Moon } from "lucide-react";
 
 export const Login: React.FC = () => {
   const { login, theme, toggleTheme } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      setError('Please fill in all fields');
+      setError("Please fill in all fields");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       await login(email, password);
-      navigate('/');
+      navigate("/");
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.message || 'Invalid email or password');
+      setError(err.response?.data?.message || "Invalid email or password");
     } finally {
       setLoading(false);
     }
@@ -43,12 +43,15 @@ export const Login: React.FC = () => {
         onClick={toggleTheme}
         className="absolute top-4 right-4 p-2.5 rounded-xl glass border border-slate-200/80 dark:border-slate-800/40 text-slate-500 dark:text-slate-400 shadow-sm hover:scale-105 active:scale-95 transition-all duration-200"
       >
-        {theme === 'dark' ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-slate-700" />}
+        {theme === "dark" ? (
+          <Sun className="w-5 h-5 text-amber-400" />
+        ) : (
+          <Moon className="w-5 h-5 text-slate-700" />
+        )}
       </button>
 
       {/* Form Container */}
       <div className="w-full max-w-md p-8 rounded-3xl glass border border-slate-200/60 dark:border-slate-800/30 shadow-2xl relative z-10 fade-in">
-        
         {/* Logo and Greeting */}
         <div className="text-center space-y-2 mb-8">
           <div className="inline-flex p-3 bg-primary-600 rounded-2xl text-white shadow-lg shadow-primary-500/20 mb-2">
@@ -72,7 +75,10 @@ export const Login: React.FC = () => {
 
           {/* Email */}
           <div className="space-y-1.5">
-            <label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <label
+              htmlFor="email"
+              className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+            >
               Email Address
             </label>
             <div className="relative">
@@ -94,7 +100,10 @@ export const Login: React.FC = () => {
           {/* Password */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              <label
+                htmlFor="password"
+                className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+              >
                 Password
               </label>
             </div>
@@ -120,15 +129,18 @@ export const Login: React.FC = () => {
             disabled={loading}
             className="w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white font-semibold shadow-lg shadow-primary-500/20 hover:shadow-xl hover:shadow-primary-500/35 hover:scale-[1.01] active:scale-95 transition-all duration-200"
           >
-            <span>{loading ? 'Signing in...' : 'Sign In'}</span>
+            <span>{loading ? "Signing in..." : "Sign In"}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
         {/* Footer Link */}
         <div className="mt-8 pt-6 border-t border-slate-200/50 dark:border-slate-800/40 text-center text-sm text-slate-500 dark:text-slate-400">
-          Don't have an account?{' '}
-          <Link to="/register" className="font-semibold text-primary-500 hover:text-primary-600 transition-colors">
+          Don't have an account?{" "}
+          <Link
+            to="/register"
+            className="font-semibold text-primary-500 hover:text-primary-600 transition-colors"
+          >
             Register here
           </Link>
         </div>

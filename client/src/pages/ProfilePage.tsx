@@ -11,7 +11,6 @@ import {
   LogOut,
   CreditCard,
   TrendingUp,
-  DollarSign,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -175,7 +174,7 @@ export const ProfilePage: React.FC = () => {
                 </h2>
               </div>
               <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500">
-                <DollarSign className="w-6 h-6" />
+                ₦ {/* <DollarSign className="w-6 h-6" /> */}
               </div>
             </div>
             <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
