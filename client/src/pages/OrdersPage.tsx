@@ -322,7 +322,7 @@ export const OrdersPage: React.FC = () => {
                     <button
                       onClick={() => {
                         // Re-trigger checkout URL or redirect
-                        const mockUrl = `http://localhost:5173/mock-payment?reference=${order.paymentReference}&amount=${order.amount}&email=${encodeURIComponent(user?.email || "")}`;
+                        const mockUrl = `${window.location.origin}/mock-payment?reference=${order.paymentReference}&amount=${order.amount}&email=${encodeURIComponent(user?.email || "")}`;
                         window.location.href = mockUrl;
                       }}
                       className="w-full md:w-auto flex items-center justify-center space-x-1.5 px-5 py-2.5 bg-primary-600 hover:bg-primary-500 text-white font-bold text-sm rounded-xl shadow-md"

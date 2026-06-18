@@ -24,7 +24,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       return;
     }
 
-    const socketUrl = 'http://localhost:5000';
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || 
+                      (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api$/, '') : 'http://localhost:5000');
     console.log('[Socket] Connecting to server...', socketUrl);
     
     const newSocket = io(socketUrl, {
