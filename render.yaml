@@ -1,0 +1,35 @@
+services:
+  # Backend API Server
+  - type: web
+    name: campusmart-server
+    env: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: MONGO_URI
+        sync: false # User will need to set this in Render dashboard
+      - key: JWT_SECRET
+        sync: false # User will need to set this in Render dashboard
+      - key: PAYSTACK_SECRET_KEY
+        sync: false # Optional: Set in Render dashboard
+      - key: PAYSTACK_WEBHOOK_SECRET
+        sync: false # Optional: Set in Render dashboard
+    buildFilter:
+      paths:
+        - server/**
+
+  # Frontend Client (Vite App)
+  - type: static
+    name: campusmart-client
+    env: static
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    buildFilter:
+      paths:
+        - client/**
